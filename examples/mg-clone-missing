@@ -1,0 +1,60 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use 5.014;
+
+# mg_each will return a Future representing all the repositories' processes
+use App::Multigit qw(mg_each);
+
+# App::Multigit::Script will take care of all the stuff you should be doing in
+# all your scripts.
+use App::Multigit::Script;
+
+# curry makes it easier to work with the repo objects
+use curry;
+
+# For each repository...
+my $future = mg_each(sub {
+    my ($repo) = @_;
+    
+    # ... run git branch ...
+    $repo->run(sub {})
+        ->finally(sub {
+                my %data = @_;
+                if($data{exitcode} == 255 
+                    && $data{stderr} =~ /Working directory.*does not exist/)
+                {
+                    my $dir = $repo->config->{dir};
+                    if ($options{absolute}) {
+                        $dir = dir($dir)->absolute;
+                    }
+                    my $clone = ['git', 'clone', $repo->config->{url}, $repo->config->{dir}, @ARGV];
+                    return $repo->run($clone, no_chdir => 1)
+                        ->finally($repo->curry::report);
+                    Future->done($dir);
+                }
+                Future->done;
+            })
+});
+
+# finally will gather up all output, whether or not the command succeeded.
+# Repo::report will then format it for output as a (directory => output) hash.
+my %report = $future->get;
+
+for my $repo (sort keys %report) {
+    say for $repo, $report{$repo};
+}
+
+# POD is used to document the script
+
+=head1 SYNOPSIS
+
+    mg-clone-missing ARGV
+
+Runs `git clone` on each missing repository passing your arguments after the 
+repo url and directory name.  See `git help clone`.
+
+With no arguments, this clones the default branch.  To clone a particular branch
+on each of the missing repositories specify --branch $name.
+
