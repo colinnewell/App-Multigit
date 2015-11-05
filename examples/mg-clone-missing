@@ -18,7 +18,6 @@ use curry;
 my $future = mg_each(sub {
     my ($repo) = @_;
     
-    # ... run git branch ...
     $repo->run(sub {})
         ->finally(sub {
                 my %data = @_;
