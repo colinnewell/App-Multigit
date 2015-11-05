@@ -106,6 +106,7 @@ sub run {
 
     my $ignore_stdout = $App::Multigit::BEHAVIOUR{ignore_stdout};
     my $ignore_stderr = $App::Multigit::BEHAVIOUR{ignore_stderr};
+    my $no_cd = $data{no_chdir} || 0;
 
     my $finish_code = sub {
         my (undef, $exitcode, $stdout, $stderr) = @_;
@@ -129,23 +130,25 @@ sub run {
 
     try
     {
+        my $setup = [];
+        unless($no_cd) {
+            $setup = [
+                chdir => $self->config->{dir}
+            ];
+        }
         if (ref $command eq 'CODE') {
             loop->run_child(
                 code => sub {
                     $command->($self, %data); 0;
                 },
-                setup => [
-                    chdir => $self->config->{dir}
-                ],
+                setup => $setup,
                 on_finish => $finish_code,
             );
         }
         else {
             loop->run_child(
                 command => $command,
-                setup => [
-                    chdir => $self->config->{dir}
-                ],
+                setup => $setup,
                 stdin => $data{stdout},
                 on_finish => $finish_code,
             )
