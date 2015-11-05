@@ -1,0 +1,55 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use 5.014;
+
+use Getopt::Long qw(:config gnu_getopt);
+use App::Multigit qw/all_repositories/;
+use Cwd qw(getcwd);
+use Try::Tiny;
+use Config::INI::Writer;
+
+my $workdir;
+GetOptions(
+    'help|h' => sub {
+        say usage();
+        exit 0;
+    },
+);
+
+my ($url) = @ARGV;
+
+# FIXME: load the mrbootstrap file
+# the produce our config based on it
+my $workdir = getcwd;
+
+my %config;
+
+# If it's already inited, we'll keep the config
+%config = try {
+    %{ all_repositories() }
+} catch {};
+
+# push our stuff into the config.
+#
+for my $repo (@repos)
+{
+    my $dir = $repo->{name};
+    # FIXME: probably flatten folder structure for directory name
+    my $url = $repo->{url};
+    my $branch = $repo->{branch};
+    $config{$url}->{dir} = $dir;
+    $config{$url}->{branch} = $branch if $branch;
+}
+
+my $config_filename = dir($workdir)->file(mgconfig);
+Config::INI::Writer->write_file(\%config, $config_filename);
+
+=head1 SYNOPSIS
+
+    mg mr-bootstrap http://git/mr_bootstrap/project
+
+Creates or updates the .mgconfig in the current working directory by downloading
+an mr bootstrap configuration.
+
+Once you have this you can then do mg clone-missing to clone the repo's.
