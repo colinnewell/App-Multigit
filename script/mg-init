@@ -61,7 +61,12 @@ if ($existing_mg) {
             if $options{'update-only'}
             or $options{clean};
 
-        $repo->run([qw(git clone), $repo->config->{url}], ia_config => { no_cd => 1 })
+        my $command = [qw(git clone), $repo->config->{url}];
+        if($repo->config->{branch})
+        {
+            push @$command, '--branch', $repo->config->{branch};
+        }
+        $repo->run($command, ia_config => { no_cd => 1 })
             ->finally($repo->curry::report)
     });
 
