@@ -120,4 +120,12 @@ For example,
 
     mg -l st -uno | mg each git push
 
+Note that mg grep does a very similar thing and may be more appropriate.
+
+    mg grep git not-master
+
+Is roughly equivalent to,
+
+    mg -lq each git not-master
+
 =back
