@@ -83,6 +83,7 @@ our %BEHAVIOUR = (
     report_on_no_output => $ENV{MG_REPORT_ON_NO_OUTPUT} // 1,
     ignore_stdout       => !!$ENV{MG_IGNORE_STDOUT},
     ignore_stderr       => !!$ENV{MG_IGNORE_STDERR},
+    list_repos          => $ENV{MG_LIST_REPOS},
     concurrent          => $ENV{MG_CONCURRENT_PROCESSES} // 20,
     skip_readonly       => !!$ENV{MG_SKIP_READONLY},
 );

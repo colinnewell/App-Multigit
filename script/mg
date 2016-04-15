@@ -25,6 +25,7 @@ sub usage;
         'verbose|v' => sub {
             $qs--;
         },
+        'list|l' => \$ENV{MG_LIST_REPOS},
         'concurrent|c=i' => \$ENV{MG_CONCURRENT_PROCESSES},
         'skip-readonly' => \$ENV{MG_SKIP_READONLY},
     );
@@ -107,5 +108,16 @@ might use this.
 
 Skip readonly repositories.  Repositories marked readonly = 1 in the .mgconfig
 will be ignored by whatever command you run.
+
+=item -l
+
+=item --list
+
+List repositories that would produce output.  This is useful for piping the list
+of repositories to another mg each.
+
+For example,
+
+    mg -l st -uno | mg each git push
 
 =back

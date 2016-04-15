@@ -252,6 +252,8 @@ sub report {
     return Future->done unless $App::Multigit::BEHAVIOUR{report_on_no_output} 
         or $output =~ s/\s//gr;
 
+    $output = '' if $App::Multigit::BEHAVIOUR{list_repos};
+
     return Future->done(
         $dir => $output
     );
